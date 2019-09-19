@@ -1,0 +1,146 @@
+import React, { Component } from 'react';
+import KumoInputBox from '../elements/kumoInputBox';
+
+class Menu_List extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      category: [],
+      initialState: []
+    }
+
+
+    this.initialState = {
+      categoryName: ''
+    }
+    // this.state = this.initialState;
+  }
+
+  onFormSubmit = (data) => {
+    const apiUrl = 'http://restaurant.com:5005/category';
+
+    const myHeaders = new Headers();
+    myHeaders.append('Content-Type', 'application/json');
+
+    const options = {
+      method: 'POST',
+      body: JSON.stringify(data),
+      myHeaders
+    };
+
+    fetch(apiUrl, options)
+      .then(res => res.json())
+      .then(result => {
+        this.setState({
+          response: result,
+          isAddProduct: false
+        })
+      },
+        (error) => {
+          this.setState({ error });
+        }
+      )
+  }
+
+  componentDidMount() {
+    fetch('http://restaurant.com:5005/category')
+      .then(res => res.json())
+      .then(
+        data => this.setState({ category: data }),
+        error => this.setState({ error })
+      )
+  }
+
+  handleChange = (event) => {
+    const name = event.target.name;
+    const value = event.target.value;
+
+    this.setState({
+      [name]: value
+    })
+  }
+
+  handleSubmit = (event) => {
+    event.preventDefault();
+    this.props.onFormSubmit(this.state);
+    this.setState(this.initialState);
+  }
+
+
+
+
+  render() {
+    return (
+      <div className='bg-light p-1 m-2'>
+        <h2>Category List</h2>
+
+        <form className="form-inline" onSubmit={this.handleSubmit}>
+          <label>Category Name</label>&nbsp;
+          <input type="text"
+            className="form-control"
+            placeholder="Enter New Category"
+            id="categoryName"
+            value={this.state.categoryName}
+            onChange={this.handleChange}
+            required /> &nbsp;
+
+          {/* <KumoInputBox className="form-control" placeholder="Enter new category" required="required"/> &nbsp; &nbsp; */}
+          <button type="submit" className="btn btn-outline-info" id="category_submit" >Add New</button>
+        </form>
+
+        <div className="table-responsive pt-2">
+          <table className="table">
+            <thead className="thead-dark">
+              <tr>
+                <th>{"Category ID"}</th>
+                <th>{"Category Name"}</th>
+                <th>{"Active"}</th>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {this.state.category.map((categories, key) => {
+                return <tr key={key}>
+                  <td>{categories.category_id}</td>
+                  <td>{categories.category_lists}</td>
+                  <td>{categories.active ? "True" : "False"}</td>
+                  <td><i className="fa fa-edit" data-toggle="modal" data-target="#myModal" />  </td>
+                  <td> <i className="fa fa-trash" />  </td>
+                </tr>
+              })}
+            </tbody>
+          </table>
+
+          {/* The Modal */}
+          <div className="modal fade" id="myModal">
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h4 className="modal-title">Edit Menu</h4>
+                  <button type="button" className="close" data-dismiss="modal">×</button>
+                </div>
+
+
+                <div className="modal-body">
+                  <label>Category ID</label>
+                  <KumoInputBox />
+
+                  <label>Category Name</label>
+                  <KumoInputBox />
+                </div>
+
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" data-dismiss="modal">Edit</button>
+                  <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+export default Menu_List
